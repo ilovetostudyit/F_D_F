@@ -180,28 +180,54 @@ int **ft_create_matrix(int **mass, int x, int y)
 	return(mass);
 }
 
+int ft_mass_size(int fd)
+{
+	int a;
+	char *new;
+
+	a = 0;
+	new = (char *)malloc(sizeof(*new) * 1);
+	while (new)
+	{
+		get_next_line(fd, &new);
+		a++;
+	}
+	return(a);
+}
+
+char **creating_newmass(int fd, char **new)
+{
+	int a;
+	int ch;
+
+	a = 0;
+	ch = 0;
+	a = ft_mass_size(fd);
+	new = (char**)malloc(sizeof(char*)*a);
+	while (ch < a)
+	{
+		new[ch] = (char *)malloc(sizeof(char)*a);
+		ch++;
+	}
+	return(new);
+}
+
 int main(int argv, char **argc)
 {
 	int fd;
 	void *mlx_ptr;
 	void *win_ptr;
-	int a;
 	char *b;
 	int **mass;
-	char *new;
+	char **new;
 
-	a = 0;
 	if (argv == 2)
 	{
 		fd = open(argc[1], O_RDONLY);
-		new = (char *)malloc(sizeof(*new) * 1);
-		get_next_line(fd, &new);
-		printf("HI %s\n", new);
+		creating_newmass(fd, new);
 		b = "00000\n01110\n01210\n01110\n00000";
 		mass = ft_create_matrix(mass, line_size(b), matrix_size(b));
 		ft_matrix_transform(mass, b);
-		printf("hi %s\n", b); //!!
-		printf("no %d\n", mass[0][0]); //!!
 		mlx_ptr = mlx_init();
 		win_ptr = mlx_new_window(mlx_ptr, 600, 600, "sonia");
 		mlx_key_hook(win_ptr, deal_key, (mlx_ptr,win_ptr));
