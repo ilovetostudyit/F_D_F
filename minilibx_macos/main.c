@@ -117,7 +117,7 @@ int matrix_size(char *str)
 	return(a+1);
 }
 
-char *ft_matrix_transform(char *str)
+char *ft_matrix_transform(int **mass, char *str)
 {
 	int i;
 	int x;
@@ -125,7 +125,6 @@ char *ft_matrix_transform(char *str)
 	int size;
 	int count;
 	int count2;
-	int mass[26][4];
 
 	i = line_size(str);
 	x = 0;
@@ -135,11 +134,12 @@ char *ft_matrix_transform(char *str)
 	size = matrix_size(str);
 	while (y < size)
 	{
-		printf("%d ", x);
-		printf("%d ", y);
-		printf("%c\n", str[count]);
+		mass[count2][0] = x;
+		mass[count2][1] = y;
+		mass[count2][2] = str[count];
 		x++;
 		count++;
+		count2++;
 		if (x == i)
 		{
 			x = 0;
@@ -150,17 +150,46 @@ char *ft_matrix_transform(char *str)
 	return(0);
 }
 
+int **ft_create_matrix(int **mass, int x, int y)
+{
+	int size;
+	int cnt;
+	int i;
+
+	i = 0;
+	cnt = 0;
+	size = (x * y) + 1;
+	mass = (int **)malloc(sizeof(int*) * size);
+	while (cnt < (size - 1))
+	{
+		mass[cnt] =(int *)malloc(sizeof(int) * 4);
+		while (i < 4)
+		{
+			mass[cnt][i] = 0;
+			i++;
+		}
+		i = 0;
+		cnt++;
+	}
+	mass[cnt] = 0;
+	printf("I AM HERE %d\n", mass[0][0]);
+	return(mass);
+}
+
 int main()
 {
 	void *mlx_ptr;
 	void *win_ptr;
 	int a;
 	char *b;
+	int **mass;
 
 	a = 0;
 	b = "00000\n01110\n01210\n01110\n00000";
-	ft_matrix_transform(b);
+	mass = ft_create_matrix(mass, line_size(b), matrix_size(b));
+	ft_matrix_transform(mass, b);
 	printf("%s\n", b);
+	printf("%d\n", mass[0][0]);
 	mlx_ptr = mlx_init();
 	win_ptr = mlx_new_window(mlx_ptr, 600, 600, "sonia");
 	mlx_key_hook(win_ptr, deal_key, (mlx_ptr,win_ptr));
