@@ -1,0 +1,1 @@
+cc main.c libmlx.a mlx.h libft/libft.h libft/libft.a get_next_line.c -framework OpenGl -framework AppKit

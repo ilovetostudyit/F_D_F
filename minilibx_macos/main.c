@@ -1,9 +1,14 @@
 
 #include <unistd.h>
-#include "mlx.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <fcntl.h>
 #include <unistd.h>
+#include <string.h>
+#include "mlx.h"
+#include "libft/libft.h"
+#include "get_next_line.h"
+
 void ft_putchar(char c)
 {
   write(1, &c, 1);
@@ -136,7 +141,7 @@ char *ft_matrix_transform(int **mass, char *str)
 	{
 		mass[count2][0] = x;
 		mass[count2][1] = y;
-		mass[count2][2] = str[count];
+		//mass[count2][2] = ft_atoi(str[count]);
 		x++;
 		count++;
 		count2++;
@@ -172,27 +177,40 @@ int **ft_create_matrix(int **mass, int x, int y)
 		cnt++;
 	}
 	mass[cnt] = 0;
-	printf("I AM HERE %d\n", mass[0][0]);
 	return(mass);
 }
 
-int main()
+int main(int argv, char **argc)
 {
+	int fd;
 	void *mlx_ptr;
 	void *win_ptr;
 	int a;
 	char *b;
 	int **mass;
+	char *new;
 
 	a = 0;
-	b = "00000\n01110\n01210\n01110\n00000";
-	mass = ft_create_matrix(mass, line_size(b), matrix_size(b));
-	ft_matrix_transform(mass, b);
-	printf("%s\n", b);
-	printf("%d\n", mass[0][0]);
-	mlx_ptr = mlx_init();
-	win_ptr = mlx_new_window(mlx_ptr, 600, 600, "sonia");
-	mlx_key_hook(win_ptr, deal_key, (mlx_ptr,win_ptr));
-	mlx_loop(mlx_ptr);
+	if (argv == 2)
+	{
+		fd = open(argc[1], O_RDONLY);
+		new = (char *)malloc(sizeof(*new) * 1);
+		get_next_line(fd, &new);
+		printf("HI %s\n", new);
+		b = "00000\n01110\n01210\n01110\n00000";
+		mass = ft_create_matrix(mass, line_size(b), matrix_size(b));
+		ft_matrix_transform(mass, b);
+		printf("hi %s\n", b); //!!
+		printf("no %d\n", mass[0][0]); //!!
+		mlx_ptr = mlx_init();
+		win_ptr = mlx_new_window(mlx_ptr, 600, 600, "sonia");
+		mlx_key_hook(win_ptr, deal_key, (mlx_ptr,win_ptr));
+		mlx_loop(mlx_ptr);
+	}
+	else
+	{
+		ft_putstr("error \n");
+	}
+
 	return(0);
 }

@@ -1,0 +1,1 @@
+cc main.c libmlx.a mlx.h libft/libft.h libft/libft.a -framework OpenGl -framework AppKit
