@@ -180,33 +180,66 @@ int **ft_create_matrix(int **mass, int x, int y)
 	return(mass);
 }
 
-int ft_mass_size(int fd)
+int ft_mass_size(char *file)
 {
 	int a;
+	int fd;
 	char *new;
 
 	a = 0;
+	fd = open(file, O_RDONLY);
 	new = (char *)malloc(sizeof(*new) * 1);
 	while (new)
 	{
 		get_next_line(fd, &new);
 		a++;
 	}
+	close(fd);
 	return(a);
 }
 
-char **creating_newmass(int fd, char **new)
+int max_words(char *file)
 {
 	int a;
+	int b;
+	int fd;
+	char *arg;
+
+	fd = open(file, O_RDONLY);
+	get_next_line(fd, &arg);
+	a = 0;
+	b = 0;
+	while(arg[a] != '\0')
+	{
+		if (arg[a] == ' ')
+		{
+			b++;
+			while (arg[a] && arg[a] == ' ')
+				a++;
+		}
+		a++;
+	}
+	close(fd);
+	return(b);
+}
+
+char **creating_newmass(char *arg, int fd, char **new)
+{
+	int x;
+	int y;
 	int ch;
 
-	a = 0;
+	y = max_words(arg);
 	ch = 0;
-	a = ft_mass_size(fd);
-	new = (char**)malloc(sizeof(char*)*a);
-	while (ch < a)
+	fd = open(arg, O_RDONLY);
+	x = ft_mass_size(arg);
+	close(fd);
+	fd = open(arg, O_RDONLY);
+	new = (char**)malloc(sizeof(char*)*x);
+	while (ch <= y)
 	{
-		new[ch] = (char *)malloc(sizeof(char)*a);
+		new[ch] = (char *)malloc(sizeof(char)*x);
+		get_next_line(fd, &new[ch]);
 		ch++;
 	}
 	return(new);
@@ -224,7 +257,7 @@ int main(int argv, char **argc)
 	if (argv == 2)
 	{
 		fd = open(argc[1], O_RDONLY);
-		creating_newmass(fd, new);
+		new = creating_newmass(argc[1], fd, new);
 		b = "00000\n01110\n01210\n01110\n00000";
 		mass = ft_create_matrix(mass, line_size(b), matrix_size(b));
 		ft_matrix_transform(mass, b);
