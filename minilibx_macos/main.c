@@ -98,88 +98,6 @@ int deal_key(void *key, void *param)
 return(1);
 }
 
-int line_size(char *str)
-{
-	int i;
-	i = 0;
-	while (str[i] != '\n')
-		i++;
-	return(i);
-}
-
-int matrix_size(char *str)
-{
-	int i;
-	int a;
-	i = 0;
-	a = 0;
-	while (str[i] != '\0')
-	{
-		if (str[i] == '\n')
-			a++;
-		i++;
-	}
-	return(a+1);
-}
-
-char *ft_matrix_transform(int **mass, char *str)
-{
-	int i;
-	int x;
-	int y;
-	int size;
-	int count;
-	int count2;
-
-	i = line_size(str);
-	x = 0;
-	y = 0;
-	count = 0;
-	count2 = 0;
-	size = matrix_size(str);
-	while (y < size)
-	{
-		mass[count2][0] = x;
-		mass[count2][1] = y;
-		//mass[count2][2] = ft_atoi(str[count]);
-		x++;
-		count++;
-		count2++;
-		if (x == i)
-		{
-			x = 0;
-			y++;
-			count++;
-		}
-	}
-	return(0);
-}
-
-int **ft_create_matrix(int **mass, int x, int y)
-{
-	int size;
-	int cnt;
-	int i;
-
-	i = 0;
-	cnt = 0;
-	size = (x * y) + 1;
-	mass = (int **)malloc(sizeof(int*) * size);
-	while (cnt < (size - 1))
-	{
-		mass[cnt] =(int *)malloc(sizeof(int) * 4);
-		while (i < 4)
-		{
-			mass[cnt][i] = 0;
-			i++;
-		}
-		i = 0;
-		cnt++;
-	}
-	mass[cnt] = 0;
-	return(mass);
-}
-
 int ft_mass_size(char *file)
 {
 	int a;
@@ -223,26 +141,77 @@ int max_words(char *file)
 	return(b);
 }
 
-char **creating_newmass(char *arg, int fd, char **new)
+char **creating_newmass(char *arg, int fd, char **new, int x, int y)
 {
-	int x;
-	int y;
 	int ch;
 
-	y = max_words(arg);
 	ch = 0;
-	fd = open(arg, O_RDONLY);
-	x = ft_mass_size(arg);
-	close(fd);
-	fd = open(arg, O_RDONLY);
 	new = (char**)malloc(sizeof(char*)*x);
-	while (ch <= y)
+	while (ch < x)
 	{
-		new[ch] = (char *)malloc(sizeof(char)*x);
-		get_next_line(fd, &new[ch]);
+		new[ch] = (char *)malloc(sizeof(char)*(y));
+		ft_bzero(new[ch], y);
+		get_next_line(fd, &(new[ch]));
 		ch++;
 	}
+	new[ch] = "\0";
 	return(new);
+}
+
+int ** matrix_transform(char **new, int **mass, char *arg, int x, int y)
+{
+	int i;
+	int cnt;
+	int cnt2;
+	char **a;
+
+	cnt = 0;
+	cnt2 = 0;
+	a = malloc(sizeof(char *) * 10000);
+	printf("x = %d\n", x);
+	printf("y = %d\n", y);
+	i = 0;
+	while (i < (x - 1))
+	{
+		//a = malloc(sizeof(char *) * 1000);
+		a = ft_strsplit(new[i], ' ');
+		while(cnt < y)
+		{
+			//printf("%d\n", cnt);
+			mass[cnt2][0] = i;
+			mass[cnt2][1] = cnt;
+			mass[cnt2][2] = ft_atoi(a[cnt]);
+			printf("%d, %d, %d\n", mass[cnt2][0], mass[cnt2][1], mass[cnt2][2]);
+			cnt++;
+			cnt2++;
+		}
+		//free(a);
+		cnt = 0;
+		//printf("%d\n", i);
+		i++;
+	}
+	return(mass);
+}
+
+int ** create_int_mass(int **mass, char *arg, int x, int y)
+{
+	int size;
+
+	x = ft_mass_size(arg);
+	printf("x = %d\n", x);
+	size = ((x - 1)	*(max_words(arg)));
+	printf("%d\n", size);
+	mass = (int **)malloc(sizeof(int *) * size);
+	x = 0;
+	while (x < size)
+	{
+		mass[x] = (int *)malloc(sizeof(int) * 4);
+		mass[x][0] = 0;
+		mass[x][1] = 0;
+		mass[x][2] = 0;
+		x++;
+	}
+	return(mass);
 }
 
 int main(int argv, char **argc)
@@ -250,17 +219,26 @@ int main(int argv, char **argc)
 	int fd;
 	void *mlx_ptr;
 	void *win_ptr;
-	char *b;
 	int **mass;
 	char **new;
-
+	int x;
+	int y;
+	int i;
 	if (argv == 2)
 	{
 		fd = open(argc[1], O_RDONLY);
-		new = creating_newmass(argc[1], fd, new);
-		b = "00000\n01110\n01210\n01110\n00000";
-		mass = ft_create_matrix(mass, line_size(b), matrix_size(b));
-		ft_matrix_transform(mass, b);
+		x = ft_mass_size(argc[1]);
+		y = max_words(argc[1]);
+		new = creating_newmass(argc[1], fd, new, x, y);
+		i = 0;
+		while  (new[i] != '\0')
+		{
+			printf("%s\n", new[i]);
+			i++;
+		}
+		close(fd);
+		mass = create_int_mass(mass, argc[1], x, y);
+		mass = matrix_transform(new, mass, argc[1], x, y);
 		mlx_ptr = mlx_init();
 		win_ptr = mlx_new_window(mlx_ptr, 600, 600, "sonia");
 		mlx_key_hook(win_ptr, deal_key, (mlx_ptr,win_ptr));
